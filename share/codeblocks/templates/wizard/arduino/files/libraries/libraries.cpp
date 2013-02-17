@@ -3,7 +3,6 @@
 #if USE_ANDROID4IO
 #include "Android4io.cpp"
 #include "Android4ioDev.cpp"
-#include "Android4ioObjs.cpp"
 #endif
 
 #if USE_EEPROM
@@ -19,6 +18,8 @@
 #include "EthernetClient.cpp"
 #include "EthernetServer.cpp"
 #include "EthernetUdp.cpp"
+#include "Dns.cpp"
+#include "Dhcp.cpp"
 #include "socket.cpp"
 #include "w5100.cpp"
 #endif
