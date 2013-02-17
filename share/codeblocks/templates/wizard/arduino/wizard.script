@@ -123,7 +123,7 @@ function CreateTarget(project, targetName, processor, variant, baudrate)
 	local build_core1 = ::wxString();
 	local build_core2 = ::wxString();
 	local optimized = false;
-		
+
 	if (!IsNull(target))
         {
 		// Post build commands
@@ -131,13 +131,13 @@ function CreateTarget(project, targetName, processor, variant, baudrate)
 	        pb_hex = _T("avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex");
 	        pb_eepbin = _T("avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O binary $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.bin");
 	        pb_bin = _T("avr-objcopy -O binary -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).bin");
-        
-	
+
+
 	        if ( PLATFORM == PLATFORM_MSW )
 	            pb_lss = _T("cmd /c \"avr-objdump -h -S $(TARGET_OUTPUT_FILE) > $(TARGET_OUTPUT_FILE).lss\"");
 	        else
 	            pb_lss = _T("avr-objdump -h -S $(TARGET_OUTPUT_FILE) > $(TARGET_OUTPUT_FILE).lss");
-		
+
 	        // avr-size is compiled with patches under winavr to produce a fancy output
 	        // which displays the percentage of memory used by the application for the
 	        // target mcu. However, this option is not available under standard binutils
@@ -146,16 +146,16 @@ function CreateTarget(project, targetName, processor, variant, baudrate)
 	            pb_avrsize = _T("avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)");
 	        else
 	            pb_avrsize = _T("avr-size $(TARGET_OUTPUT_FILE)");
-		
+
 	        // Setup the linker options
 	        lo_map = _T("-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref");
-		
+
 	        // Get external memory start address
 	        lo_extmem = _T("-Wl,--section-start=.data=") + AvrExtMemAddr;
-		
+
 		// Project compiler options
 		target.AddCompilerOption(_T("-mmcu=$(MCU)"));
-		        
+
 	        if (processor.Matches(_T("atmega1280"))) {
 			target.AddCompilerOption(_T("-D__AVR_ATmega1280__"));
 			optimized = true;
@@ -167,36 +167,36 @@ function CreateTarget(project, targetName, processor, variant, baudrate)
 	        } else {
 			target.AddCompilerOption(_T("-D__AVR_ATmega328P__"));
 	        }
-		        
+
 	       	target.AddIncludeDir(_T("$(ARDUINO_DIR)/hardware/arduino/cores/arduino"));
 		target.AddIncludeDir(_T("$(ARDUINO_DIR)/libraries"));
        		target.AddIncludeDir(_T("$(ARDUINO_DIR)/hardware/arduino/variants/" + variant));
 
-		
+
 	        // Project linker options
 	        target.AddLinkerOption(_T("-mmcu=$(MCU)"));
-		
+
 	        if (AvrMap)
 	            target.AddLinkerOption(lo_map);
-		
+
 	        if (AvrExtMem)
 	            target.AddLinkerOption(lo_extmem);
-		
+
 	        // Project post-build steps
 		target.AddCommandsAfterBuild(pb_hex);
 		target.AddCommandsAfterBuild(pb_eephex);
 		target.AddCommandsAfterBuild(pb_avrsize);
-		
+
 	        if ( AvrLss )
 		target.AddCommandsAfterBuild(pb_lss);
-		            
+
 		target.AddLinkerOption(_T("-s"));
 
 		OptimizationsOn(target, Wizard.GetCompilerID());
 		target.SetTargetType(ttConsoleOnly);
 		target.SetTargetFilenameGenerationPolicy(tgfpPlatformDefault, tgfpNone);
 		target.SetOutputFilename(Wizard.GetReleaseOutputDir() + Wizard.GetProjectName() + _T(".elf"));
-        
+
 		target.SetVar(_T("BOARD"), targetName, false);
 		target.SetVar(_T("MCU"), processor, false);
 		target.SetVar(_T("UPLOAD_BAUDRATE"), baudrate, false);
@@ -215,7 +215,7 @@ function CreateTarget(project, targetName, processor, variant, baudrate)
 			target.AddCommandsAfterBuild(_T("avrdude -V -C /etc/avrdude.conf -p${MCU} -carduino -P${UPLOAD_PORT} -b${UPLOAD_BAUDRATE} -D -Uflash:w:${TARGET_OUTPUT_DIR}${TARGET_OUTPUT_BASENAME}.elf.hex:i"));
 		}
 		AddCoreSourceCode(project, targetName);
-			
+
 	}
 }
 
@@ -228,7 +228,7 @@ function SetSimTarget(project, target)
 	target.AddCompilerOption(_T("-DENABLE_API_NAME"));
 	target.AddCompilerOption(_T("-D__AVR_ATmega328P__"));
 	target.AddCompilerOption(_T("-DARDUSIM_SERIAL_PORT=0"));
-	project.AddLinkerOption(_T("-lpthread"));
+	target.AddLinkerOption(_T("-lpthread"));
 	target.SetVar(_T("ARDUINO_DIR"), _T("${HOME}/.codeblocks/ardusim"), false);
 	target.SetVar(_T("ARDUINO_LIB_DIR"), _T("$(HOME)/.codeblocks/arduino"), false);
 
@@ -263,7 +263,7 @@ function SetupProject(project)
 		while (idx < tempLibArray.GetCount())
 		{
 			project.AddIncludeDir(_T("$(ARDUINO_LIB_DIR)/libraries/") + tempLibArray.Item(idx));
-			project.AddIncludeDir(_T("$(ARDUINO_LIB_DIR)/libraries/") + tempLibArray.Item(idx) 
+			project.AddIncludeDir(_T("$(ARDUINO_LIB_DIR)/libraries/") + tempLibArray.Item(idx)
 							+ _T("/utility"));
 
 			if(tempLibArray.Item(idx).Matches(_T("Android4io")))
@@ -298,7 +298,7 @@ function SetupProject(project)
 
 			if(tempLibArray.Item(idx).Matches(_T("Stepper")))
 				project.AddCompilerOption(_T("-DUSE_STEPPER=1"));
-			
+
 			if(tempLibArray.Item(idx).Matches(_T("USB_HOST20")))
 				project.AddCompilerOption(_T("-DUSE_USB_HOST20=1"));
 
@@ -314,7 +314,7 @@ function SetupProject(project)
 	}
 
 	WarningsOn(project, Wizard.GetCompilerID());
-	
+
 	CreateTarget(project, _T("Arduino Uno"), _T("atmega328p"), _T("standard"), _T("115200"));
 	CreateTarget(project, _T("Arduino Duemilanove (328)"), _T("atmega328p"), _T("standard"), _T("57600"));
 	CreateTarget(project, _T("Arduino Duemilanove (168)"), _T("atmega168"), _T("standard"), _T("19200"));
@@ -334,7 +334,7 @@ function SetupProject(project)
 		DebugSymbolsOn(target, Wizard.GetCompilerID());
 		SetSimTarget(project, target);
 	}
-	
+
 	// Release build target
 	target = project.GetBuildTarget(Wizard.GetReleaseName());
 	if (!IsNull(target))
@@ -344,6 +344,6 @@ function SetupProject(project)
 	}
 	project.RenameBuildTarget(0, _T("Simulator - Debug"));
 	project.RenameBuildTarget(1, _T("Simulator - Release"));
-	
+
 	return true;
 }
